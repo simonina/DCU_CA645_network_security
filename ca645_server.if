@@ -1,0 +1,40 @@
+
+## <summary>policy for ca645_server</summary>
+
+########################################
+## <summary>
+##	Execute ca645_server_exec_t in the ca645_server domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`ca645_server_domtrans',`
+	gen_require(`
+		type ca645_server_t, ca645_server_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, ca645_server_exec_t, ca645_server_t)
+')
+
+######################################
+## <summary>
+##	Execute ca645_server in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ca645_server_exec',`
+	gen_require(`
+		type ca645_server_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, ca645_server_exec_t)
+')

@@ -1,0 +1,65 @@
+policy_module(ca645_server, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+##Required imports
+require{
+	type unconfined_t;
+	role unconfined_r;
+	type node_t;
+	type ca645_server_t;
+}
+type ca645_port_t;
+corenet_port(ca645_port_t)
+type ca645_server_t;
+type ca645_server_exec_t;
+init_daemon_domain(ca645_server_t, ca645_server_exec_t)
+
+
+
+########################################
+#
+# ca645_server local policy
+#
+
+allow unconfined_t ca645_server_t : process transition;
+#giving domain permission to transition into the ca647_server_t (target)domain
+
+allow unconfined_t ca645_server_exec_t : file { execute read getattr };
+#executable file needs to be executable in the source domain
+
+allow ca645_server_t ca645_server_exec_t : file entrypoint;
+#executable file needs an entry point into the target
+
+type_transition unconfined_t ca645_server_exec_t : process ca645_server_t; 
+#exec system call will automatically perform a domain transition for programs that are not themselves SELinux-aware.
+
+role unconfined_r types ca645_server_t;
+#Allow unconfined role to transition into target domain
+
+
+######from audit 2 allow log
+allow ca645_server_t node_t:tcp_socket node_bind;
+#permission to bind to socket
+
+allow ca645_server_t self:tcp_socket { accept listen };
+#permission to listen on tcp socket
+
+allow ca645_server_t ca645_port_t:tcp_socket name_bind;
+#binds to ca645_port_t which we have customised to allow access to 8001
+
+
+######autopopulated by sepolgen command when policy was created
+
+allow ca645_server_t self:unix_stream_socket create_stream_socket_perms;
+#autopopulated permission to use unix sockets
+
+sysnet_dns_name_resolve(ca645_server_t);
+#perform a DNS name resolution
+
+
+
+
